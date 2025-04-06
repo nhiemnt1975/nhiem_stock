@@ -33,3 +33,10 @@ jobs:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}  # Token lưu trong GitHub Secrets
           CHAT_ID: ${{ secrets.CHAT_ID }}      # ID nhóm/chat Telegram
         run: python tintuc.py  # Tên file chính của bạn
+              - name: Notify Telegram
+        if: always()  # Chạy dù thành công hay thất bại
+        run: |
+          curl -X POST \
+          -H "Content-Type: application/json" \
+          -d '{"chat_id":"${{ secrets.CHAT_ID }}", "text":"GitHub Actions: ${{ job.status }}"}' \
+          "https://api.telegram.org/bot${{ secrets.BOT_TOKEN }}/sendMessage"
