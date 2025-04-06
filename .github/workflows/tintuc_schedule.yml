@@ -1,0 +1,35 @@
+name: Daily Telegram Bot Report
+
+on:
+  schedule:
+    - cron: '0 1 * * *'  # 1h sáng UTC hàng ngày (tương đương 8h GMT+7)
+  workflow_dispatch:  # Cho phép chạy thủ công
+
+jobs:
+  send-report:
+    runs-on: ubuntu-latest  # Máy ảo Ubuntu
+
+    steps:
+      # Bước 1: Checkout code từ repo
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Bước 2: Cài đặt Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'  # Phiên bản Python của bạn
+
+      # Bước 3: Cài đặt thư viện
+      - name: Install dependencies
+        run: |
+          pip install python-telegram-bot
+          pip install requests
+          pip install pandas  # Thêm thư viện khác nếu cần
+
+      # Bước 4: Chạy bot với token bảo mật
+      - name: Run Telegram Bot
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}  # Token lưu trong GitHub Secrets
+          CHAT_ID: ${{ secrets.CHAT_ID }}      # ID nhóm/chat Telegram
+        run: python tintuc.py  # Tên file chính của bạn
