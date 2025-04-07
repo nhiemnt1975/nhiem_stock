@@ -127,8 +127,8 @@ def main():
     # Chạy ngay lần đầu
     job()
 
-    # Lập lịch mỗi 1 phút
-    schedule.every(1).minutes.do(job)
+    # Lập lịch mỗi 60 phút
+    schedule.every(60).minutes.do(job)
 
     print("Đang chạy...")
     while True:
