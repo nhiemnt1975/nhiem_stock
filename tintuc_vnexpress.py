@@ -66,7 +66,7 @@ def job():
 
 def main():
     # Lập lịch chạy mỗi phút
-    schedule.every(1).minutes.do(job)
+    schedule.every(60).minutes.do(job)
 
     # Chạy ngay lần đầu
     job()
