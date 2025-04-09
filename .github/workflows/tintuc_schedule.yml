@@ -2,12 +2,13 @@ name: Daily Telegram Bot Report
 
 on:
   schedule:
-    - cron: '0 1 * * *'  # 1h sáng UTC hàng ngày (tương đương 8h GMT+7)
+    - cron: '0 */1 * * *'  # Chạy mỗi giờ một lần (để đảm bảo liên tục)
   workflow_dispatch:  # Cho phép chạy thủ công
 
 jobs:
   send-report:
     runs-on: ubuntu-latest  # Máy ảo Ubuntu
+    timeout-minutes: 1440  # Thời gian chạy tối đa 24h (1440 phút)
 
     steps:
       # Bước 1: Checkout code từ repo
@@ -27,18 +28,25 @@ jobs:
           pip install requests
           pip install beautifulsoup4
           pip install schedule
-          pip install pandas  # Thêm thư viện khác nếu cần
+          pip install pandas
+          pip install python-crontab  # Thêm thư viện hỗ trợ lập lịch
 
-      # Bước 4: Chạy bot với token bảo mật
-      - name: Run Telegram Bot
+      # Bước 4: Chạy bot liên tục
+      - name: Run Telegram Bot Continuously
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}  # Token lưu trong GitHub Secrets
           CHAT_ID: ${{ secrets.CHAT_ID }}      # ID nhóm/chat Telegram
-        run: python tintuc.py  # Tên file chính của bạn
+        run: |
+          while true; do
+            python tintuc.py  # Tên file chính của bạn
+            sleep 3600  # Chờ 1 tiếng trước khi chạy lại (3600 giây)
+          done
+
+      # Bước 5: Thông báo trạng thái
       - name: Notify Telegram
         if: always()  # Chạy dù thành công hay thất bại
         run: |
           curl -X POST \
           -H "Content-Type: application/json" \
-          -d '{"chat_id":"${{ secrets.CHAT_ID }}", "text":"GitHub Actions: ${{ job.status }}"}' \
+          -d '{"chat_id":"${{ secrets.CHAT_ID }}", "text":"GitHub Actions: ${{ job.status }} - Bot đã chạy xong một chu kỳ"}' \
           "https://api.telegram.org/bot${{ secrets.BOT_TOKEN }}/sendMessage"
